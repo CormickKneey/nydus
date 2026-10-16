@@ -1,0 +1,17 @@
+# DRAFT ONLY — self-hosted / manual e2e. Do not place under .github/workflows/
+# without `workflow` scope and a runner that provides golden disk.raw.
+#
+# name: macos-e2e-manual
+# on:
+#   workflow_dispatch:
+# jobs:
+#   e2e:
+#     runs-on: [self-hosted, linux, kvm, nydus-macos-lab]
+#     steps:
+#       - uses: actions/checkout@v4
+#       - run: make release
+#       - run: make macos-phase1-build   # MACOS_BUILD_TREE points at lab disk
+#       - run: make macos-phase2-smoke
+#       - run: make macos-phase3-bench  # then human/lab scripts fill results
+#       # NEVER upload disk.raw / IPSW as actions artifacts
+name: placeholder

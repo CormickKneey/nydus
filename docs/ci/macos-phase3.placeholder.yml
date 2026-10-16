@@ -1,0 +1,21 @@
+# DRAFT ONLY — do not install under .github/workflows/ until the token
+# has the `workflow` scope.
+#
+# Intended job (when enabled):
+#   - make macos-phase3-bench          # expect failure without disk.raw on GH-hosted
+#   - make macos-phase3-optimize-check # expect failure without bootstrap/trace
+#   - or: continue-on-error / skip if artifact secret absent
+#
+# name: macos-phase3-scaffold
+# on:
+#   push:
+#     branches: [experiment/v3-macos]
+# jobs:
+#   check:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - run: bash misc/macos/phase3/phase3-bench.sh || test $? -eq 1
+#       - run: bash misc/macos/phase3/phase3-optimize-check.sh || test $? -eq 1
+#       - run: bash misc/macos/phase3/optimize-examples.sh
+name: placeholder
