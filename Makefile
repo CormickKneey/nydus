@@ -323,7 +323,7 @@ MACOS_BUILD_TREE ?= $(CURDIR)/misc/macos/examples/build-tree.example
 MACOS_ARTIFACT_DIR ?= $(CURDIR)/misc/macos/artifacts
 MACOS_BLOB ?= $(MACOS_ARTIFACT_DIR)/macos-disk.blob
 
-.PHONY: macos-phase1-check macos-phase1-build macos-phase1-nydus-check
+.PHONY: macos-phase1-check macos-phase1-build macos-phase1-nydus-check macos-phase2-smoke
 
 # Toolchain + layout check; safe without a guest disk.
 macos-phase1-check:
@@ -347,6 +347,10 @@ macos-phase1-nydus-check: release
 	@test -f "$(MACOS_BLOB)" || { echo "missing $(MACOS_BLOB); run make macos-phase1-build first"; exit 1; }
 	$(CARGO) run --release --features $(FEATURES) --bin nydus -- check --blob "$(MACOS_BLOB)"
 
+
+# Phase 2: prereq smoke only (fails clearly without disk.raw; no VM start).
+macos-phase2-smoke:
+	bash $(CURDIR)/misc/macos/phase2/phase2-smoke.sh
 
 clean:
 	$(CARGO) clean

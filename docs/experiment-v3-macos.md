@@ -19,7 +19,7 @@
 
 ## Runtime 优先级
 
-1. **rund（默认）**：microVM / 块设备或 UFFD 路径，与现有 Linux agent 沙箱叙事最贴近  
+1. **rund（默认）**：microVM + 主机 nydus 挂出 `disk.raw` → virtio-blk 文件后端（模型 A）  
 2. **runc**：评估是否复用同一套主机侧后端；若仍依赖 VM 则并入 rund 路径，避免两套重复实现
 
 ## 与 Linux→Linux OCI 的关键差异（摘要）
@@ -58,11 +58,14 @@
 - [ ] 真实 golden APFS 盘 + `nydus build` / `nydus check`（需实验室资产）
 - [ ] registry/本地分发冒烟（依赖上一款）
 
-### Phase 2 — 主机侧按需读（rund 优先）
+### Phase 2 — 主机侧按需读（rund 优先）（设计 + 脚手架已落地）
 
-- `NydusCore` / UFFD 或 ublk/nbd 喂给 microVM
-- 本地缓存、多实例共享预热
-- 冒烟：最小 macOS 环境到 shell / agent 就绪
+- [x] 主机按需架构文档（模型 A：fuse/ublk → `disk.raw` → virtio-blk 文件后端）  
+  → [`docs/experiment-v3-macos-phase2-host-ondemand.md`](experiment-v3-macos-phase2-host-ondemand.md)
+- [x] 脚手架：`misc/macos/phase2/`（host-mount YAML、rund 接线笔记、`phase2-smoke.sh`）
+- [x] 代码触点清单：[`docs/experiment-v3-macos-phase2-code-touches.md`](experiment-v3-macos-phase2-code-touches.md)
+- [ ] 真实 `nydus fuse` 挂出 + rund/QEMU 冒烟到 shell/agent ready（需 golden 盘 + KVM 接线）
+- [ ] 多实例共享 cache 实测
 
 ### Phase 3 — 冷启动闭环与对比
 
@@ -93,6 +96,18 @@
 
 **Phase 1 技术结论摘要：** nydus 留在 Linux 主机；guest 内保持 APFS；默认用「nydus 挂出含 `disk.raw` 的树 → VMM virtio-blk 文件后端」；不要默认走 guest EROFS/UFFD-pmem。
 
+## Phase 2 状态（2026-10-16）
+
+| 项 | 状态 |
+|----|------|
+| 主机按需架构文档 | 已写入 `docs/experiment-v3-macos-phase2-host-ondemand.md` |
+| 代码触点清单 | `docs/experiment-v3-macos-phase2-code-touches.md` |
+| phase2 脚手架 | `misc/macos/phase2/` |
+| 真实 fuse 挂载 + rund 冒烟 | **未做**（阻塞：golden `disk.raw` + rund/VMM 接线） |
+| 上游 PR | 不做 |
+
+**Phase 2 技术结论摘要：** 一期默认 **`nydus fuse` + 文件后端 virtio-blk`**；ublk/nbd 仅作主机 EROFS 挂载备选；UFFD/pmem **不是** macOS 根盘默认。`phase2-smoke.sh` 在缺盘时必须非零退出。
+
 ## 工作区说明
 
 个人账号无法把公开仓 **private fork**。本仓为独立 private 仓库：树内容对齐上游 `v3` tip，因 OAuth 缺少 `workflow` scope，推送时省略了 `.github/workflows/*`。需要完整历史与 workflow 时，用带 `workflow` 权限的 token 从上游重新 mirror。
@@ -102,4 +117,6 @@
 - 上游：https://github.com/dragonflyoss/nydus/tree/v3  
 - 里程碑 v3.0.0：https://github.com/dragonflyoss/nydus/milestone/1  
 - Phase 1 镜像流水线：[`docs/experiment-v3-macos-phase1-image-pipeline.md`](experiment-v3-macos-phase1-image-pipeline.md)  
-- 包装脚手架：[`misc/macos/`](../misc/macos/)  
+- Phase 2 主机按需：[`docs/experiment-v3-macos-phase2-host-ondemand.md`](experiment-v3-macos-phase2-host-ondemand.md)  
+- Phase 2 代码触点：[`docs/experiment-v3-macos-phase2-code-touches.md`](experiment-v3-macos-phase2-code-touches.md)  
+- 包装脚手架：[`misc/macos/`](../misc/macos/) · Phase 2：[`misc/macos/phase2/`](../misc/macos/phase2/)  

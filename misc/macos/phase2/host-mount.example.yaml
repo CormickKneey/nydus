@@ -1,0 +1,42 @@
+# 主机侧 nydus 挂载示例（模型 A · Phase 2）
+#
+# 意图：fuse（默认）或 ublk+erofs 挂出含 disk.raw 的树，
+# 供 rund/VMM virtio-blk 文件后端使用。
+# 字段为实验约定，非上游 CLI 的正式 schema。
+
+apiVersion: experiment.nydus.macos/v1alpha1
+kind: HostOndemandMount
+metadata:
+  name: macos-a
+
+nydus:
+  # 由 Phase 1 build 产生；路径由实验室填写
+  bootstrap: /var/lib/nydus-macos/artifacts/macos-disk.boot
+  # 若使用单文件 blob 工作流，按本机实际 CLI 调整
+  blob: /var/lib/nydus-macos/artifacts/macos-disk.blob
+  config: /etc/nydus/macos-storage.yaml   # 可从 misc/macos/config/storage.local.example.yaml 复制
+  backend: fuse                          # fuse | ublk-erofs | nbd-erofs
+  mountpoint: /run/nydus/macos-a
+  disk_relative_path: disk.raw
+
+# 派生路径（文档用；脚本用环境变量覆盖）
+derived:
+  disk_path: /run/nydus/macos-a/disk.raw
+
+lifecycle:
+  # 建议：先 mount，再交给 rund；停机先停 VM 再 fusermount -u
+  start_order:
+    - nydus_mount
+    - rund_create
+  stop_order:
+    - rund_destroy
+    - nydus_unmount
+
+cache:
+  # 与 storage config 中 cache_dir 对齐；多实例可共享
+  shared_cache_dir: /var/tmp/nydus-macos-cache
+  per_instance_mount: true
+
+notes:
+  - "缺 disk.raw / 未 build 时不要宣称 smoke 成功"
+  - "系统盘建议以只读方式提供给 VMM，可写变更用 overlay 或第二块盘"

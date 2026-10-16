@@ -2,7 +2,7 @@
 
 > **状态：脚手架 only。** 这里没有可启动的 macOS 系统盘，也没有端到端验证。  
 > 产品方向：Linux 主机 → macOS 容器（rund 优先 / runc 其次）+ nydus v3 冷启动与按需加载。  
-> 详设：[`docs/experiment-v3-macos-phase1-image-pipeline.md`](../../docs/experiment-v3-macos-phase1-image-pipeline.md)
+> 详设：Phase 1 [`docs/experiment-v3-macos-phase1-image-pipeline.md`](../../docs/experiment-v3-macos-phase1-image-pipeline.md) · Phase 2 [`docs/experiment-v3-macos-phase2-host-ondemand.md`](../../docs/experiment-v3-macos-phase2-host-ondemand.md)
 
 ## 布局
 
@@ -12,6 +12,7 @@
 | `examples/build-tree.example/` | `nydus build` 输入树约定（不含真实 `disk.raw`） |
 | `examples/oci-bundle.example/` | 外层 runc OCI bundle 示意 |
 | `scripts/phase1-check.sh` | 检查本机是否具备 build/check 工具链与占位路径 |
+| `phase2/` | 主机按需挂载 YAML、rund 接线笔记、`phase2-smoke.sh` |
 
 ## 不要提交
 
