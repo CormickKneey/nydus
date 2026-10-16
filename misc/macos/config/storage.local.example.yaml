@@ -1,0 +1,20 @@
+# nydus 本地存储示例（experiment/v3-macos）
+# 复制为本地文件后按需修改；勿提交含密钥的副本。
+#
+# 用法示意（Phase 2 验证）：
+#   nydus fuse --bootstrap /path/to/macos.boot \
+#     --config misc/macos/config/storage.local.example.yaml \
+#     --mountpoint /run/nydus/macos-a
+
+storage:
+  # 解码后的 chunk 缓存目录（多实例可共享同一路径）
+  cache_dir: /var/tmp/nydus-macos-cache
+  # 单次按需拉取窗口（压缩字节）；可按盘与网络再调
+  fetch_size: 2097152
+
+# 仅本地 blob 时，可不用 registry 段。
+# 若 blob 在目录中按 sha256 命名：
+backend:
+  type: local
+  local:
+    dir: /var/lib/nydus-macos/blobs

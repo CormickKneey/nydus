@@ -1,0 +1,9 @@
+# Placeholder metadata for experiment/v3-macos build tree.
+# Replace when a real golden disk is available.
+image_id: unset
+macos_version: unset
+disk_format: raw
+apfs: true
+source_policy: user-provided-not-in-repo
+size_bytes: 0
+notes: No disk.raw checked in; Phase 1 scaffolding only.

@@ -1,0 +1,43 @@
+# rund / VMM 侧示例（假设约定，非上游 rund 官方 schema）
+#
+# 意图：主机已用 nydus fuse/ublk 挂出含 disk.raw 的树，
+# VMM 以文件后端把该 raw 盘交给 macOS guest。
+#
+# 字段名为示意，接入真实 rund/Kata/QEMU 时需改成对应配置格式。
+
+apiVersion: experiment.nydus.macos/v1alpha1
+kind: MacosSandboxSpec
+metadata:
+  name: agent-macos-0
+
+hypervisor:
+  # 假设：Dragonball / QEMU / Cloud Hypervisor 之一
+  engine: qemu
+  cpus: 4
+  memory_mib: 8192
+  kvm: true
+
+firmware:
+  # 用户自备；路径仅为示例
+  opencore_dir: /var/lib/nydus-macos/firmware/OpenCore
+  ovmf_code: /var/lib/nydus-macos/firmware/OVMF_CODE.fd
+  ovmf_vars: /var/lib/nydus-macos/instances/agent-macos-0/OVMF_VARS.fd
+
+nydus:
+  # 主机侧挂载点（由 nydus fuse/ublk 提供）
+  mountpoint: /run/nydus/macos-a
+  disk_relative_path: disk.raw
+
+disks:
+  - name: system
+    # 假设：文件后端 virtio-blk；guest 内为 APFS
+    source: "${nydus.mountpoint}/${nydus.disk_relative_path}"
+    driver: virtio-blk
+    readonly: false
+    boot: true
+
+agent:
+  # Phase 3 用：guest 就绪判据（SSH / 进程）
+  ready_probe:
+    type: ssh
+    port: 22

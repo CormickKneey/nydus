@@ -316,5 +316,37 @@ test-top-images: release
 		NYDUSFS_TOP_IMAGES_WORKDIR=$(TOP_IMAGES_WORKDIR) \
 		$(GO_BIN) test -v -run '^TestTopImages$$' -count $(TOP_IMAGES_COUNT) -timeout $(TOP_IMAGES_TIMEOUT) $(TOP_IMAGES_GO_TEST_ARGS) $(TOP_IMAGES_TEST_FILES)
 
+# ---------------------------------------------------------------------------
+# experiment/v3-macos Phase 1 placeholders (no e2e claim without disk.raw)
+# ---------------------------------------------------------------------------
+MACOS_BUILD_TREE ?= $(CURDIR)/misc/macos/examples/build-tree.example
+MACOS_ARTIFACT_DIR ?= $(CURDIR)/misc/macos/artifacts
+MACOS_BLOB ?= $(MACOS_ARTIFACT_DIR)/macos-disk.blob
+
+.PHONY: macos-phase1-check macos-phase1-build macos-phase1-nydus-check
+
+# Toolchain + layout check; safe without a guest disk.
+macos-phase1-check:
+	bash $(CURDIR)/misc/macos/scripts/phase1-check.sh
+
+# Build nydus blob from MACOS_BUILD_TREE. Fails clearly if disk.raw is absent.
+macos-phase1-build: release
+	@test -e "$(MACOS_BUILD_TREE)/disk.raw" || { \
+	  echo "macos-phase1-build: missing $(MACOS_BUILD_TREE)/disk.raw"; \
+	  echo "Provide a user-owned golden APFS raw disk (not stored in git)."; \
+	  echo "See misc/macos/README.md and docs/experiment-v3-macos-phase1-image-pipeline.md"; \
+	  exit 1; \
+	}
+	mkdir -p "$(MACOS_ARTIFACT_DIR)"
+	$(CARGO) run --release --features $(FEATURES) --bin nydus -- build \
+	  --blob "$(MACOS_BLOB)" "$(MACOS_BUILD_TREE)"
+	@echo "wrote $(MACOS_BLOB)"
+
+# Validate a previously built blob.
+macos-phase1-nydus-check: release
+	@test -f "$(MACOS_BLOB)" || { echo "missing $(MACOS_BLOB); run make macos-phase1-build first"; exit 1; }
+	$(CARGO) run --release --features $(FEATURES) --bin nydus -- check --blob "$(MACOS_BLOB)"
+
+
 clean:
 	$(CARGO) clean

@@ -41,18 +41,22 @@
 
 ## Phase 0–5 摘要
 
-### Phase 0 — 基线与仓（当前）
+### Phase 0 — 基线与仓
 
 - [x] private 仓 + `v3` / `experiment/v3-macos`
 - [x] 本目标与计划文档
 - [ ] 选定可复现 Linux 实验机与基准 macOS 容器镜像
 - [ ] （可选）补齐 `workflow` scope，按上游 SHA 完整镜像含 `.github/workflows`
 
-### Phase 1 — 镜像与构建面
+### Phase 1 — 镜像与构建面（文档与脚手架已落地）
 
-- 摸清 macOS 容器根盘/层在 rund、runc 下如何挂载
-- `nydus build` / nydusify：转换或「外层磁盘 + 内层按需」包装约定
-- 打通：构建产物 → registry/本地 → 主机侧校验
+- [x] 调研 runc vs rund 包形态与 nydus 主机侧接入点  
+  → 详见 [`docs/experiment-v3-macos-phase1-image-pipeline.md`](experiment-v3-macos-phase1-image-pipeline.md)
+- [x] 约定 rund 优先流水线（模型 A：EROFS 承载 `disk.raw` + virtio-blk 文件后端）
+- [x] 脚手架：`misc/macos/`（config / examples / scripts），Makefile 占位目标
+- [x] CI 草稿：`docs/ci/macos-phase1.placeholder.yml`（因缺 `workflow` scope，不进 `.github/workflows`）
+- [ ] 真实 golden APFS 盘 + `nydus build` / `nydus check`（需实验室资产）
+- [ ] registry/本地分发冒烟（依赖上一款）
 
 ### Phase 2 — 主机侧按需读（rund 优先）
 
@@ -77,6 +81,18 @@
 - CI：Linux build + 可跑单测/集成；e2e 可标 manual
 - 整理 PR 系列合回上游 `v3`（格式无关优先；平台适配可留 experiment）
 
+
+## Phase 1 状态（2026-10-16）
+
+| 项 | 状态 |
+|----|------|
+| 镜像流水线调研文档 | 已写入 `docs/experiment-v3-macos-phase1-image-pipeline.md` |
+| 包装脚手架 | `misc/macos/` |
+| 真实 e2e / IPSW | **未做**（无基准盘与 KVM 实验机） |
+| 上游 PR | 不做（按计划 private 迭代） |
+
+**Phase 1 技术结论摘要：** nydus 留在 Linux 主机；guest 内保持 APFS；默认用「nydus 挂出含 `disk.raw` 的树 → VMM virtio-blk 文件后端」；不要默认走 guest EROFS/UFFD-pmem。
+
 ## 工作区说明
 
 个人账号无法把公开仓 **private fork**。本仓为独立 private 仓库：树内容对齐上游 `v3` tip，因 OAuth 缺少 `workflow` scope，推送时省略了 `.github/workflows/*`。需要完整历史与 workflow 时，用带 `workflow` 权限的 token 从上游重新 mirror。
@@ -85,3 +101,5 @@
 
 - 上游：https://github.com/dragonflyoss/nydus/tree/v3  
 - 里程碑 v3.0.0：https://github.com/dragonflyoss/nydus/milestone/1  
+- Phase 1 镜像流水线：[`docs/experiment-v3-macos-phase1-image-pipeline.md`](experiment-v3-macos-phase1-image-pipeline.md)  
+- 包装脚手架：[`misc/macos/`](../misc/macos/)  

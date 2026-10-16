@@ -1,0 +1,44 @@
+{
+  "ociVersion": "1.0.2",
+  "process": {
+    "terminal": true,
+    "user": { "uid": 0, "gid": 0 },
+    "args": ["/usr/local/bin/start-macos-vm"],
+    "env": ["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"],
+    "cwd": "/"
+  },
+  "root": {
+    "path": "rootfs",
+    "readonly": false
+  },
+  "hostname": "macos-wrapper",
+  "mounts": [
+    {
+      "destination": "/run/nydus/macos-a",
+      "type": "bind",
+      "source": "/run/nydus/macos-a",
+      "options": ["rbind", "ro"]
+    }
+  ],
+  "linux": {
+    "namespaces": [
+      { "type": "pid" },
+      { "type": "network" },
+      { "type": "ipc" },
+      { "type": "uts" },
+      { "type": "mount" }
+    ],
+    "devices": [
+      {
+        "path": "/dev/kvm",
+        "type": "c",
+        "major": 10,
+        "minor": 232,
+        "fileMode": 438,
+        "uid": 0,
+        "gid": 0
+      }
+    ]
+  },
+  "_comment": "Illustrative outer runc wrapper only. Not a tested bundle. Prefer rund-first host VMM + nydus mount; see docs/experiment-v3-macos-phase1-image-pipeline.md"
+}
