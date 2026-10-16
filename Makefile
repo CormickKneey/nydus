@@ -323,7 +323,7 @@ MACOS_BUILD_TREE ?= $(CURDIR)/misc/macos/examples/build-tree.example
 MACOS_ARTIFACT_DIR ?= $(CURDIR)/misc/macos/artifacts
 MACOS_BLOB ?= $(MACOS_ARTIFACT_DIR)/macos-disk.blob
 
-.PHONY: macos-phase1-check macos-phase1-build macos-phase1-nydus-check macos-phase2-smoke
+.PHONY: macos-phase1-check macos-phase1-build macos-phase1-nydus-check macos-phase2-smoke macos-phase3-bench macos-phase3-optimize-check
 
 # Toolchain + layout check; safe without a guest disk.
 macos-phase1-check:
@@ -351,6 +351,14 @@ macos-phase1-nydus-check: release
 # Phase 2: prereq smoke only (fails clearly without disk.raw; no VM start).
 macos-phase2-smoke:
 	bash $(CURDIR)/misc/macos/phase2/phase2-smoke.sh
+
+# Phase 3: cold-start bench prereq (fails without disk/blob; no fabricated timings).
+macos-phase3-bench:
+	bash $(CURDIR)/misc/macos/phase3/phase3-bench.sh
+
+# Phase 3: optimize input check (dry-run unless MACOS_PHASE3_RUN_OPTIMIZE=1).
+macos-phase3-optimize-check:
+	bash $(CURDIR)/misc/macos/phase3/phase3-optimize-check.sh
 
 clean:
 	$(CARGO) clean

@@ -67,22 +67,25 @@
 - [ ] 真实 `nydus fuse` 挂出 + rund/QEMU 冒烟到 shell/agent ready（需 golden 盘 + KVM 接线）
 - [ ] 多实例共享 cache 实测
 
-### Phase 3 — 冷启动闭环与对比
+### Phase 3 — 冷启动闭环与对比（设计 + 脚手架已落地）
 
-- 访问 trace → `nydus optimize` → ondemand blob
-- 拆开指标并对比整盘/整 OCI
-- 修正确性洞（崩溃恢复、缓存失效、权限）
+- [x] 指标拆分与实验协议文档  
+  → [`docs/experiment-v3-macos-phase3-coldstart.md`](experiment-v3-macos-phase3-coldstart.md)
+- [x] 脚手架：`misc/macos/phase3/`（bench / optimize-check / 样例命令 / 结果模板）
+- [ ] 真实采 trace → `nydus optimize` → 填实对比表（需 golden 盘 + KVM + rund/QEMU）
+- [ ] 正确性专项（崩溃恢复、缓存失效、权限）随实验室闭环一起做
 
-### Phase 4 — 快照与增量（可选）
+### Phase 4 — 快照与增量（可选）（纸面骨架已落地）
 
-- 接 v3 incremental writer：层变更 → 增量 blob
-- 与 rund / VM snapshot 生命周期对齐
+- [x] 骨架文档：[`docs/experiment-v3-macos-phase4-incremental.md`](experiment-v3-macos-phase4-incremental.md)
+- [ ] incremental writer + overlay/快照实验室集成（需 Phase 2/3 真机）
 
-### Phase 5 — 文档、CI、回上游
+### Phase 5 — 文档、CI、回上游（纸面清单已落地）
 
-- 最小操作手册 + 已知限制
-- CI：Linux build + 可跑单测/集成；e2e 可标 manual
-- 整理 PR 系列合回上游 `v3`（格式无关优先；平台适配可留 experiment）
+- [x] 回上游清单与 CI 占位：[`docs/experiment-v3-macos-phase5-upstream.md`](experiment-v3-macos-phase5-upstream.md)
+- [x] CI 草稿：`docs/ci/macos-phase3.placeholder.yml`、`macos-e2e.manual.placeholder.yml`（不进 `.github/workflows`）
+- [ ] 实验室 Quickstart 一页纸（首台成功机之后）
+- [ ] 对 `dragonflyoss/nydus` 开 PR（需显式授权；默认不开）
 
 
 ## Phase 1 状态（2026-10-16）
@@ -108,6 +111,27 @@
 
 **Phase 2 技术结论摘要：** 一期默认 **`nydus fuse` + 文件后端 virtio-blk`**；ublk/nbd 仅作主机 EROFS 挂载备选；UFFD/pmem **不是** macOS 根盘默认。`phase2-smoke.sh` 在缺盘时必须非零退出。
 
+## Phase 3 状态（2026-10-16）
+
+| 项 | 状态 |
+|----|------|
+| 冷启动设计文档 | 已写入 `docs/experiment-v3-macos-phase3-coldstart.md` |
+| phase3 脚手架 | `misc/macos/phase3/` |
+| 填实对比数据 / optimize 实跑 | **未做**（阻塞：golden `disk.raw` + rund/VMM + 可启动链路） |
+| 上游 PR | 不做 |
+
+**Phase 3 技术结论摘要：** 指标必须拆开 **T_pull / T_runtime / T_ready**；optimize 输入来自 **主机 fuse `/trace`（chunk-group）**，不是 guest 内 APFS 路径；缺盘时 bench 脚本必须失败且不得编造秒数。
+
+## Phase 4–5 状态（2026-10-16）
+
+| 项 | 状态 |
+|----|------|
+| Phase 4 增量/快照骨架 | `docs/experiment-v3-macos-phase4-incremental.md` |
+| Phase 5 上游/CI 清单 | `docs/experiment-v3-macos-phase5-upstream.md` |
+| 真机增量 / 上游 PR | **未做** |
+
+**纸面轨道：** Phase 0–5 文档入口已齐；实验室与上游合入仍显式挂起。
+
 ## 工作区说明
 
 个人账号无法把公开仓 **private fork**。本仓为独立 private 仓库：树内容对齐上游 `v3` tip，因 OAuth 缺少 `workflow` scope，推送时省略了 `.github/workflows/*`。需要完整历史与 workflow 时，用带 `workflow` 权限的 token 从上游重新 mirror。
@@ -119,4 +143,7 @@
 - Phase 1 镜像流水线：[`docs/experiment-v3-macos-phase1-image-pipeline.md`](experiment-v3-macos-phase1-image-pipeline.md)  
 - Phase 2 主机按需：[`docs/experiment-v3-macos-phase2-host-ondemand.md`](experiment-v3-macos-phase2-host-ondemand.md)  
 - Phase 2 代码触点：[`docs/experiment-v3-macos-phase2-code-touches.md`](experiment-v3-macos-phase2-code-touches.md)  
-- 包装脚手架：[`misc/macos/`](../misc/macos/) · Phase 2：[`misc/macos/phase2/`](../misc/macos/phase2/)  
+- Phase 3 冷启动：[`docs/experiment-v3-macos-phase3-coldstart.md`](experiment-v3-macos-phase3-coldstart.md)  
+- Phase 4 增量骨架：[`docs/experiment-v3-macos-phase4-incremental.md`](experiment-v3-macos-phase4-incremental.md)  
+- Phase 5 上游清单：[`docs/experiment-v3-macos-phase5-upstream.md`](experiment-v3-macos-phase5-upstream.md)  
+- 包装脚手架：[`misc/macos/`](../misc/macos/) · Phase 2：[`misc/macos/phase2/`](../misc/macos/phase2/) · Phase 3：[`misc/macos/phase3/`](../misc/macos/phase3/)  

@@ -2,7 +2,7 @@
 
 > **状态：脚手架 only。** 这里没有可启动的 macOS 系统盘，也没有端到端验证。  
 > 产品方向：Linux 主机 → macOS 容器（rund 优先 / runc 其次）+ nydus v3 冷启动与按需加载。  
-> 详设：Phase 1 [`docs/experiment-v3-macos-phase1-image-pipeline.md`](../../docs/experiment-v3-macos-phase1-image-pipeline.md) · Phase 2 [`docs/experiment-v3-macos-phase2-host-ondemand.md`](../../docs/experiment-v3-macos-phase2-host-ondemand.md)
+> 详设：Phase 1 [`docs/experiment-v3-macos-phase1-image-pipeline.md`](../../docs/experiment-v3-macos-phase1-image-pipeline.md) · Phase 2 [`docs/experiment-v3-macos-phase2-host-ondemand.md`](../../docs/experiment-v3-macos-phase2-host-ondemand.md) · Phase 3 [`docs/experiment-v3-macos-phase3-coldstart.md`](../../docs/experiment-v3-macos-phase3-coldstart.md)
 
 ## 布局
 
@@ -13,6 +13,7 @@
 | `examples/oci-bundle.example/` | 外层 runc OCI bundle 示意 |
 | `scripts/phase1-check.sh` | 检查本机是否具备 build/check 工具链与占位路径 |
 | `phase2/` | 主机按需挂载 YAML、rund 接线笔记、`phase2-smoke.sh` |
+| `phase3/` | 冷启动 bench/optimize 脚手架、结果模板 |
 
 ## 不要提交
 
@@ -34,6 +35,11 @@ make macos-phase1-build MACOS_BUILD_TREE=misc/macos/examples/build-tree.example
 make macos-phase1-check
 
 # 4) 主机挂载后，把 .../disk.raw 交给 rund/QEMU virtio-blk（Phase 2）
+make macos-phase2-smoke
+
+# 5) 冷启动对比前置检查（Phase 3；缺盘必须失败）
+make macos-phase3-bench
+make macos-phase3-optimize-check
 ```
 
-无盘时，`make macos-phase1-build` 会失败并打印说明——这是预期行为。
+无盘时，`make macos-phase1-build` / `macos-phase3-bench` 会失败并打印说明——这是预期行为。
